@@ -20,65 +20,65 @@ window.addEventListener('beforeinstallprompt', function(event){
     return false;
 })
 
-var promise = new Promise(function(resolve, reject){
-    setTimeout(function(){
-        // resolve('this is excuted once the timer is done')
-        reject({code: 500, message: "An error occurred"})
-    }, 3000)
-});
+// var promise = new Promise(function(resolve, reject){
+//     setTimeout(function(){
+//         // resolve('this is excuted once the timer is done')
+//         reject({code: 500, message: "An error occurred"})
+//     }, 3000)
+// });
 
 //So what to use XML or fetch 
 //We will use fetch as  fetch is async which will work with service workers but XML is sync 
-var xhr = XMLHttpRequest();
-xhr.open('GET', 'https://httpbin.org/ip');
-xhr.responseType = 'json';
+// var xhr = XMLHttpRequest();
+// xhr.open('GET', 'https://httpbin.org/ip');
+// xhr.responseType = 'json';
 
-xhr.onload = function(){
-    console.log(xhr.response);
-}
+// xhr.onload = function(){
+//     console.log(xhr.response);
+// }
 
-xhr.onerror = function(){
-    console.log('XML Error');
-}
+// xhr.onerror = function(){
+//     console.log('XML Error');
+// }
 
-xhr.send();
+// xhr.send();
 
 //Example how to use fetch to get data
-fetch('https://httpbin.org/ip')
-.then(function(response){
-    console.log(response);
-    //we need to parse the response 
-    return response.json();
-}).then(function(data){
-    console.log(data);
-}).catch(function(error){
-    console.log(error);
-})
+// fetch('https://httpbin.org/ip')
+// .then(function(response){
+//     console.log(response);
+//     //we need to parse the response 
+//     return response.json();
+// }).then(function(data){
+//     console.log(data);
+// }).catch(function(error){
+//     console.log(error);
+// })
 
 
 //Example how to use fetch to post data
-fetch('https://httpbin.org/post', {
-    method: 'POST',
-    headers: {
-        'Content-Type' : 'application/json',
-        'Accept' : 'application/json',
-    },
-    //this means that the response will include cors headers
-    //we choose the mode to be cors to be able to access the data from javascript
-    mode: 'cors',
-    body: JSON.stringify({
-        message: 'Does this work!'
-    })
-})
-.then(function(response){
-    console.log(response);
-    //we need to parse the response 
-    return response.json();
-}).then(function(data){
-    console.log(data);
-}).catch(function(error){
-    console.log(error);
-})
+// fetch('https://httpbin.org/post', {
+//     method: 'POST',
+//     headers: {
+//         'Content-Type' : 'application/json',
+//         'Accept' : 'application/json',
+//     },
+//     //this means that the response will include cors headers
+//     //we choose the mode to be cors to be able to access the data from javascript
+//     mode: 'cors',
+//     body: JSON.stringify({
+//         message: 'Does this work!'
+//     })
+// })
+// .then(function(response){
+//     console.log(response);
+//     //we need to parse the response 
+//     return response.json();
+// }).then(function(data){
+//     console.log(data);
+// }).catch(function(error){
+//     console.log(error);
+// })
 
 //For promise resolve
 // promise.then(function(text){
@@ -87,11 +87,11 @@ fetch('https://httpbin.org/post', {
 //     console.log(error.message);
 // })
 
-promise.then(function(text){
-        console.log(text);
-}).catch(function(error){
-    console.log(error.message);
-})
+// promise.then(function(text){
+//         console.log(text);
+// }).catch(function(error){
+//     console.log(error.message);
+// })
 // for promise reject
 
 
@@ -99,4 +99,4 @@ promise.then(function(text){
 // setTimeout(function(){
 //     console.log('this is excuted once the timer is done')
 // }, 3000)
-console.log('This is excuted right after setTimeOut');
+// console.log('This is excuted right after setTimeOut');
