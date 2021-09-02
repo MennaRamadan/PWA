@@ -1,4 +1,4 @@
-var CACHE_STATIC_NAME = 'static-v8'; 
+var CACHE_STATIC_NAME = 'static-v13'; 
 var CACH_DYNAMIC_NAME = 'dynamic-v2'
 
 self.addEventListener('install', function(event){
@@ -42,24 +42,69 @@ self.addEventListener('activate', function(event){
 //dymanic cache
 self.addEventListener('fetch', function(event){
     event.respondWith(
-        caches.match(event.request).then(function(response){
-            if(response){
-                //return cached value
-                return response;
-            }else{
-                //cont with server request
-                return fetch(event.request).then(function(res){
-                    caches.open(CACH_DYNAMIC_NAME).then(function(cache){
-                        cache.put(event.request.url, res.clone())
-                        return res;
-                    })
-                }).catch(function(){
-                    return caches.open(CACHE_STATIC_NAME).then(function(cache){
-                        return cache.match('/offline.html')
-                    })
-                });
-            }
+        caches.open(CACH_DYNAMIC_NAME)
+        .then(function(cache){
+            return fetch(event.request)
+            .then(function(res){
+                cache.put(event.request, res.clone());
+                return res;
+            })
         })
     );
 });
 
+
+// self.addEventListener('fetch', function(event){
+//     event.respondWith(
+//         caches.match(event.request).then(function(response){
+//             if(response){
+//                 //return cached value
+//                 return response;
+//             }else{
+//                 //cont with server request
+//                 return fetch(event.request).then(function(res){
+//                     caches.open(CACH_DYNAMIC_NAME).then(function(cache){
+//                         cache.put(event.request.url, res.clone())
+//                         return res;
+//                     })
+//                 }).catch(function(){
+//                     return caches.open(CACHE_STATIC_NAME).then(function(cache){
+//                         return cache.match('/offline.html')
+//                     })
+//                 });
+//             }
+//         })
+//     );
+// });
+
+
+//dymanic cache with network first
+// self.addEventListener('fetch', function(event){
+//     event.respondWith(
+//         fetch(event.request)
+//         .then(function(res){
+//             caches.open(CACH_DYNAMIC_NAME).then(function(cache){
+//                 cache.put(event.request.url, res.clone())
+//                 return res;
+//             })
+//         })
+//         .catch(function(error){
+//             return caches.match(event.request)
+//         })
+//     );
+// });
+
+//cache-only is not the best to use
+// self.addEventListener('fetch', function(event){
+//     event.respondWith(
+//         caches.match(event.request)
+//     );
+// });
+
+
+//Network-only is not the best to use as this method ignore cache so our app will not work on offline
+// self.addEventListener('fetch', function(event){
+//     event.respondWith(
+//         fetch(event.request)
+//     );
+// });
