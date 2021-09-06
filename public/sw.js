@@ -1,25 +1,26 @@
 var CACHE_STATIC_NAME = 'static-v13'; 
 var CACH_DYNAMIC_NAME = 'dynamic-v2'
+var STATIC_FILES = [
+    '/',
+    '/index.html',
+    '/offline.html',
+    '/src/js/app.js',
+    '/src/js/feed.js',
+    '/src/js/promise.js',
+    '/src/js/fetch.js',
+    '/src/js/material.min.js',
+    '/src/css/app.css',
+    '/src/css/feed.css',
+    '/src/images/main-image.jpg',
+    'https://fonts.googleapis.com/css?family=Roboto:400,700',
+    'https://fonts.googleapis.com/icon?family=Material+Icons',
+    'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
+];
 
 self.addEventListener('install', function(event){
     event.waitUntill(caches.open(CACHE_STATIC_NAME).then(function(cache){  
         console.log('[Service workers] Precaching files') 
-        cache.addAll([
-            '/',
-            '/index.html',
-            '/offline.html',
-            '/src/js/app.js',
-            '/src/js/feed.js',
-            '/src/js/promise.js',
-            '/src/js/fetch.js',
-            '/src/js/material.min.js',
-            '/src/css/app.css',
-            '/src/css/feed.css',
-            '/src/images/main-image.jpg',
-            'https://fonts.googleapis.com/css?family=Roboto:400,700',
-            'https://fonts.googleapis.com/icon?family=Material+Icons',
-            'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
-        ]);
+        cache.addAll([STATIC_FILES]);
     }));
 });
 
@@ -41,16 +42,53 @@ self.addEventListener('activate', function(event){
 
 //dymanic cache
 self.addEventListener('fetch', function(event){
-    event.respondWith(
-        caches.open(CACH_DYNAMIC_NAME)
-        .then(function(cache){
-            return fetch(event.request)
-            .then(function(res){
-                cache.put(event.request, res.clone());
-                return res;
+    var url = 'https://httpbin.org/get';
+    if(event.request.url.indexOf(url) > -1) {
+        //found this string
+        event.respondWith(
+            caches.open(CACH_DYNAMIC_NAME)
+            .then(function(cache){
+                return fetch(event.request)
+                .then(function(res){
+                    cache.put(event.request, res.clone());
+                    return res;
+                })
             })
-        })
-    );
+        );
+    }
+    else if(new RegExp('\\b' + STATIC_FILES.join('\\b|\\b') + '\\b').test(event.request.url)){
+        event.respondWith(
+            caches.match(event.request)
+        );
+    }
+    else{
+        event.respondWith(
+            //look at the cache first then network
+            caches.match(event.request).then(function(response){
+                if(response){
+                    //return cached value
+                    return response;
+                }else{
+                    //cont with server request
+                    return fetch(event.request).then(function(res){
+                        caches.open(CACH_DYNAMIC_NAME).then(function(cache){
+                            cache.put(event.request.url, res.clone())
+                            return res;
+                        })
+                    }).catch(function(){
+                        return caches.open(CACHE_STATIC_NAME).then(function(cache){
+                            if(event.request.url.indexOf('/help')){
+                                return cache.match('/offline.html')
+                            }
+                            else{
+
+                            }
+                        })
+                    });
+                }
+            })
+        )
+    }
 });
 
 
