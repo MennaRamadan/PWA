@@ -1,4 +1,4 @@
-var CACHE_STATIC_NAME = 'static-v13'; 
+var CACHE_STATIC_NAME = 'static-v15'; 
 var CACH_DYNAMIC_NAME = 'dynamic-v2'
 var STATIC_FILES = [
     '/',
@@ -16,6 +16,16 @@ var STATIC_FILES = [
     'https://fonts.googleapis.com/icon?family=Material+Icons',
     'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
 ];
+
+// function trimCache(cacheName, maxItems){
+//     caches.open(cacheName).then(function(cache){
+//         return cache.keys().then(function(keys){
+//             if(keys.length > maxItems){
+//                 caches.delete(keys[0]).then(trimCache(cacheName, maxItems))
+//             }
+//         })
+//     })
+// }
 
 self.addEventListener('install', function(event){
     event.waitUntill(caches.open(CACHE_STATIC_NAME).then(function(cache){  
@@ -40,6 +50,17 @@ self.addEventListener('activate', function(event){
     return self.clients.claim();
 });
 
+function isInArray(string, array) {
+    var cachePath;
+    if (string.indexOf(self.origin) === 0) { // request targets domain where we serve the page from (i.e. NOT a CDN)
+      console.log('matched ', string);
+      cachePath = string.substring(self.origin.length); // take the part of the URL AFTER the domain (e.g. after localhost:8080)
+    } else {
+      cachePath = string; // store the full request (for CDNs)
+    }
+    return array.indexOf(cachePath) > -1;
+  }
+
 //dymanic cache
 self.addEventListener('fetch', function(event){
     var url = 'https://httpbin.org/get';
@@ -50,13 +71,14 @@ self.addEventListener('fetch', function(event){
             .then(function(cache){
                 return fetch(event.request)
                 .then(function(res){
+                    // trimCache(CACH_DYNAMIC_NAME, 3); //really aggrisive it may be 10 or 20
                     cache.put(event.request, res.clone());
                     return res;
                 })
             })
         );
     }
-    else if(new RegExp('\\b' + STATIC_FILES.join('\\b|\\b') + '\\b').test(event.request.url)){
+    else if(isInArray(event.request.url, STATIC_FILES)){
         event.respondWith(
             caches.match(event.request)
         );
@@ -72,12 +94,13 @@ self.addEventListener('fetch', function(event){
                     //cont with server request
                     return fetch(event.request).then(function(res){
                         caches.open(CACH_DYNAMIC_NAME).then(function(cache){
+                            // trimCache(CACH_DYNAMIC_NAME, 3); //really aggrisive it may be 10 or 20
                             cache.put(event.request.url, res.clone())
                             return res;
                         })
                     }).catch(function(){
                         return caches.open(CACHE_STATIC_NAME).then(function(cache){
-                            if(event.request.url.indexOf('/help')){
+                            if(event.request.headers.get('accept').include('text/html')){
                                 return cache.match('/offline.html')
                             }
                             else{

@@ -20,6 +20,15 @@ function openCreatePostModal() {
 
     deferredPrompt = null;
   }
+
+  //unregister service workers file
+  // if('serviceWorker' in navigator){
+  //   navigator.serviceWorker.getRegistrations().then(function(registrations){
+  //     for(var i = 0; i < registrations.length ; i++){
+  //       registrations[i].unregister();
+  //     }
+  //   })
+  // }
 }
 
 function closeCreatePostModal() {
@@ -78,7 +87,16 @@ function createCard() {
 var url = 'https://httpbin.org/get';
 var networkDataRecived = false;
 
-fetch(url)
+fetch(url,{
+  method: 'POST',
+  headers: {
+    'Content-Type' : 'application/json',
+    'Accept': 'application/json'
+  },
+  body: JSON.stringify({
+    message: 'Some Message'
+  })
+})
   .then(function(res) {
     return res.json();
   })
@@ -92,8 +110,10 @@ fetch(url)
 
 if('caches' in window){
   caches.match(url)
-  .then(function(response){
-    return response.json();
+  .then(function(res){
+    if(res){
+      return res.json();
+    }
   })
   .then(function(data){
     console.log('From cache', data);
