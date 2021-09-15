@@ -57,23 +57,23 @@ function clearCards(){
   }
 }
 
-function createCard() {
+function createCard(data) {
   var cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
   var cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
-  cardTitle.style.backgroundImage = 'url("/src/images/sf-boat.jpg")';
+  cardTitle.style.backgroundImage = 'url(' + data.image + ')';
   cardTitle.style.backgroundSize = 'cover';
   cardTitle.style.height = '180px';
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement('h2');
-  cardTitleTextElement.className = 'mdl-card__title-text';
+  cardTitleTextElement.className = 'mdl-card__title-text';;
   cardTitleTextElement.style.color = 'white';
-  cardTitleTextElement.textContent = 'San Francisco Trip';
+  cardTitleTextElement.textContent = data.Title;
   cardTitle.appendChild(cardTitleTextElement);
   var cardSupportingText = document.createElement('div');
   cardSupportingText.className = 'mdl-card__supporting-text';
-  cardSupportingText.textContent = 'In San Francisco';
+  cardSupportingText.textContent = data.Location;
   cardSupportingText.style.textAlign = 'center';
   // var cardSaveButton = document.createElement('button');
   // cardSaveButton.textContent = 'Save'; 
@@ -84,27 +84,28 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-var url = 'https://httpbin.org/get';
+function updateUI(data){
+  for (var i = 0; i < data.length ; i++){
+    createCard(data[i]);
+  }
+}
+
+var url = 'https://pwaprogram-4dd56-default-rtdb.firebaseio.com/posts.json';
 var networkDataRecived = false;
 
-fetch(url,{
-  method: 'POST',
-  headers: {
-    'Content-Type' : 'application/json',
-    'Accept': 'application/json'
-  },
-  body: JSON.stringify({
-    message: 'Some Message'
-  })
-})
+fetch(url)
   .then(function(res) {
     return res.json();
   })
   .then(function(data) {
     networkDataRecived = true;
+    //to convert from object to array
+    var dataArray = [];
+    for(var key in data){
+      dataArray.push(data[key]);
+    }
     console.log('From Web', data)
-    clearCards();
-    createCard();
+    updateUI(dataArray);
 });
 
 
@@ -118,8 +119,12 @@ if('caches' in window){
   .then(function(data){
     console.log('From cache', data);
     if(!networkDataRecived){
-      clearCards();
-      createCard();
+       //to convert from object to array
+      var dataArray = [];
+      for(var key in data){
+        dataArray.push(data[key]);
+      }
+      updateUI(dataArray);
     }
   }) 
 }

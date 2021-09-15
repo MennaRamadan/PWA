@@ -1,5 +1,5 @@
 var CACHE_STATIC_NAME = 'static-v15'; 
-var CACH_DYNAMIC_NAME = 'dynamic-v2'
+var CACHE_DYNAMIC_NAME = 'dynamic-v2'
 var STATIC_FILES = [
     '/',
     '/index.html',
@@ -27,20 +27,24 @@ var STATIC_FILES = [
 //     })
 // }
 
-self.addEventListener('install', function(event){
-    event.waitUntill(caches.open(CACHE_STATIC_NAME).then(function(cache){  
-        console.log('[Service workers] Precaching files') 
-        cache.addAll([STATIC_FILES]);
-    }));
+self.addEventListener('install', function (event) {
+    console.log('[Service Worker] Installing Service Worker ...', event);
+    event.waitUntil(
+      caches.open(CACHE_STATIC_NAME)
+        .then(function (cache) {
+          console.log('[Service Worker] Precaching App Shell');
+          cache.addAll(STATIC_FILES);
+        })
+    )
 });
 
 //clear old caches
 self.addEventListener('activate', function(event){
-    event.waitUntill(
+    event.waitUntil(
         caches.keys().then(function(keyList){
             //return this function when all return
             return Promise.all(keyList.map(function(key){
-                if(key !== CACHE_STATIC_NAME && key !== CACH_DYNAMIC_NAME){
+                if(key !== CACHE_STATIC_NAME && key !== CACHE_DYNAMIC_NAME){
                     console.log('[Service worker .. removing old case]');
                     return caches.delete(key);
                 }
@@ -63,18 +67,18 @@ function isInArray(string, array) {
 
 //dymanic cache
 self.addEventListener('fetch', function(event){
-    var url = 'https://httpbin.org/get';
+    var url = 'https://pwaprogram-4dd56-default-rtdb.firebaseio.com/posts';
     if(event.request.url.indexOf(url) > -1) {
         //found this string
         event.respondWith(
-            caches.open(CACH_DYNAMIC_NAME)
+            caches.open(CACHE_DYNAMIC_NAME)
             .then(function(cache){
                 return fetch(event.request)
                 .then(function(res){
                     // trimCache(CACH_DYNAMIC_NAME, 3); //really aggrisive it may be 10 or 20
                     cache.put(event.request, res.clone());
                     return res;
-                })
+                });
             })
         );
     }
@@ -93,7 +97,7 @@ self.addEventListener('fetch', function(event){
                 }else{
                     //cont with server request
                     return fetch(event.request).then(function(res){
-                        caches.open(CACH_DYNAMIC_NAME).then(function(cache){
+                        caches.open(CACHE_DYNAMIC_NAME).then(function(cache){
                             // trimCache(CACH_DYNAMIC_NAME, 3); //really aggrisive it may be 10 or 20
                             cache.put(event.request.url, res.clone())
                             return res;
