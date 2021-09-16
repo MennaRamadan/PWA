@@ -1,5 +1,8 @@
-var CACHE_STATIC_NAME = 'static-v15'; 
-var CACHE_DYNAMIC_NAME = 'dynamic-v2'
+//by default service workers not working with libraries, so to make it point to specific libarary use the following 
+importScripts('/src/js/idb.js');
+
+var CACHE_STATIC_NAME = 'static-v16'; 
+var CACHE_DYNAMIC_NAME = 'dynamic-v2';
 var STATIC_FILES = [
     '/',
     '/index.html',
@@ -7,6 +10,7 @@ var STATIC_FILES = [
     '/src/js/app.js',
     '/src/js/feed.js',
     '/src/js/promise.js',
+    '/src/js/idb.js',
     '/src/js/fetch.js',
     '/src/js/material.min.js',
     '/src/css/app.css',
@@ -16,6 +20,12 @@ var STATIC_FILES = [
     'https://fonts.googleapis.com/icon?family=Material+Icons',
     'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
 ];
+
+var dbPromise = idb.open('posts-store', 1, function(db){
+    if(!db.objectStoreNames.contains('posts')){ 
+        db.createObjectStore('posts', {keyPath: 'id'})
+    }
+}) //open a new database
 
 // function trimCache(cacheName, maxItems){
 //     caches.open(cacheName).then(function(cache){
@@ -70,15 +80,23 @@ self.addEventListener('fetch', function(event){
     var url = 'https://pwaprogram-4dd56-default-rtdb.firebaseio.com/posts';
     if(event.request.url.indexOf(url) > -1) {
         //found this string
-        event.respondWith(
-            caches.open(CACHE_DYNAMIC_NAME)
-            .then(function(cache){
-                return fetch(event.request)
-                .then(function(res){
-                    // trimCache(CACH_DYNAMIC_NAME, 3); //really aggrisive it may be 10 or 20
-                    cache.put(event.request, res.clone());
-                    return res;
+        event.respondWith(fetch(event.request)
+            .then(function(res){
+                // trimCache(CACH_DYNAMIC_NAME, 3); //really aggrisive it may be 10 or 20
+                // cache.put(event.request, res.clone());
+                //store the response in db
+                var clonedRes = res.clone();
+                clonedRes.json().then(function(data){
+                    for(var key in data){
+                        dbPromise.then(function(db){
+                            var tx = db.transaction('posts', 'readwrite');
+                            var store = tx.objectStore('posts');
+                            store.put(data[key]);
+                            return tx.complete;
+                        });
+                    }
                 });
+                return res;
             })
         );
     }
