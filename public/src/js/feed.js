@@ -109,24 +109,13 @@ fetch(url)
 });
 
 
-if('caches' in window){
-  caches.match(url)
-  .then(function(res){
-    if(res){
-      return res.json();
+if('indexDB' in window){
+  readAllData('posts').then(function(data){
+    if(!networkDataRecived){
+      console.log('From Cache', data)
+      updateUI(data);
     }
   })
-  .then(function(data){
-    console.log('From cache', data);
-    if(!networkDataRecived){
-       //to convert from object to array
-      var dataArray = [];
-      for(var key in data){
-        dataArray.push(data[key]);
-      }
-      updateUI(dataArray);
-    }
-  }) 
 }
 
 
