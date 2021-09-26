@@ -1,4 +1,5 @@
 var deferredPrompt;
+var enableNotificationsBtns = document.querySelectorAll('.enable-notifications');
 
 if(!window.Promise){
     window.Promise = Promise
@@ -100,3 +101,38 @@ window.addEventListener('beforeinstallprompt', function(event){
 //     console.log('this is excuted once the timer is done')
 // }, 3000)
 // console.log('This is excuted right after setTimeOut');
+
+function displayConfirmNotification(){
+    if('serviceWorker' in navigator){
+        var options = {
+            body: 'You successfully subscribed to our notification service'
+        }
+        navigator.serviceWorker.ready.then(function(swReg){//show notification using service workers
+            swReg.showNotification('Successfully subscribed (From SW)!', options)
+        })
+        //handling notifcation from browser
+        // var options = {
+        //     body: 'You successfully subscribed to our notification service'
+        // }
+        // new Notification('Successfully subscribed!', options);
+    }
+}
+
+function askForNotificationPermission(){
+    Notification.requestPermission(function(result){ //open prompt to user to allow notification
+        console.log('User result', result);
+        if(result !== 'granted'){
+            console.log('No notification permission granted!');
+        }
+        else{
+            displayConfirmNotification();
+        }
+    })
+}
+
+if('Notification' in window){
+    for(var i = 0; i < enableNotificationsBtns.length ; i++){
+        enableNotificationsBtns[i].style.display = 'inline-block';
+        enableNotificationsBtns[i].addEventListener('click', askForNotificationPermission)
+    }
+}
