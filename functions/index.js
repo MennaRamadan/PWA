@@ -1,6 +1,10 @@
 const functions = require("firebase-functions");
 var admin = require('firebase-admin');
-var cors = require('cors')({origin: true}); //to allow cros origin access
+var cors = require('cors')({
+    origin:'*', 
+    credentials:true,            //access-control-allow-credentials:true
+    optionSuccessStatus:200,
+ }); //to allow cros origin access
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
