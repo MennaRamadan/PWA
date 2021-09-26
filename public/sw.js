@@ -3,7 +3,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
 
-var CACHE_STATIC_NAME = 'static-v22'; 
+var CACHE_STATIC_NAME = 'static-v24'; 
 var CACHE_DYNAMIC_NAME = 'dynamic-v2';
 var STATIC_FILES = [
     '/',
@@ -187,3 +187,39 @@ self.addEventListener('fetch', function(event){
 //         fetch(event.request)
 //     );
 // });
+
+self.addEventListener('sync', function(event){
+    console.log('[Service worker] Background syncing!', event);
+    if(event.tag === 'sync-new-post'){
+      console.log('Syncing new post');
+      event.waitUntil(
+        readAllData('sync-posts').then(function(data){
+            for(var dt of data) {
+                fetch('https://us-central1-pwaprogram-4dd56.cloudfunctions.net/storePostData', {
+                    method: 'POST',
+                    headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                    id: dt.id,
+                    Title : dt.title,
+                    Location: dt.location,
+                    image: 'https://firebasestorage.googleapis.com/v0/b/pwaprogram-4dd56.appspot.com/o/CITY-SFO-1.jfif?alt=media&token=f0673f33-3ec7-4765-9127-e0e282d42a9c'
+                    })
+                }).then(function(res){
+                    console.log('Sent data', res);
+                    if(res.ok){//200
+                        res.JSON.then(function(resData){
+                            deleteItemFromDB('sync-posts', resData.id);
+                        })
+                    }
+                })
+                .catch(function(err){
+                    console.log('Error while sending data', err)
+                })
+            }
+        })
+      )
+    }
+  })

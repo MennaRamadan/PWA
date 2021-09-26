@@ -2,6 +2,9 @@ var shareImageButton = document.querySelector('#share-image-button');
 var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var sharedMomentsArea = document.querySelector('#shared-moments');
+var form = document.querySelector('form');
+var titleForm = document.querySelector('#title');
+var locationForm = document.querySelector('#location');
 
 function openCreatePostModal() {
   // createPostArea.style.display = 'block';
@@ -120,5 +123,54 @@ if('indexDB' in window){
     }
   })
 }
+
+function sendData(){
+  fetch('https://us-central1-pwaprogram-4dd56.cloudfunctions.net/storePostData', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      id: new Date().toISOString(),
+      Title : titleForm.value,
+      Location: locationForm.value,
+      image: 'https://firebasestorage.googleapis.com/v0/b/pwaprogram-4dd56.appspot.com/o/CITY-SFO-1.jfif?alt=media&token=f0673f33-3ec7-4765-9127-e0e282d42a9c'
+    })
+  }).then(function(res){
+    console.log('Sent data', res);
+    updateUI();
+  })
+}
+
+form.addEventListener('submit', function(event){
+  event.preventDefault();
+  if(titleForm.value.trim() === '' || locationForm.value.trim() === ''){
+    return;
+  }
+  closeCreatePostModal();
+  if('serviceWorker' in navigator && 'SyncManager' in window){
+    navigator.serviceWorker.ready.then(function(sw){
+      var post = {
+        'id': new Date().toISOString(),
+        'Title': titleForm.value,
+        'Location': locationForm.value
+      }
+      writeData('sync-posts', post).then(function(){
+        return sw.sync.register('sync-new-post');
+      }).then(function(){
+        var snackBarContainer = document.querySelector('#confirmation-toast');
+        var data = {message: 'Your Post was saved for syncing!'};
+        snackBarContainer.MaterialSnackbar.showSnackbar(data); 
+      }).catch(function(error){
+        console.log(err);
+      })
+    })
+  }
+  //incase of browser doesnot support syncing function
+  else{
+    sendData();
+  }
+})
 
 
