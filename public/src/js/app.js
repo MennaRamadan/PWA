@@ -130,6 +130,47 @@ function displayConfirmNotification(){
     }
 }
 
+function configurePushSub(){
+    if(!('serviceWorker' in navigator)){
+        return;
+    }
+    var reg;
+    navigator.serviceWorker.ready
+    .then(function(swReg){
+        reg = swReg;
+        return swReg.pushManager.getSubscription();
+    }).then(function(sub){
+        if(sub === null){
+            var vapidPublicKey= 'BDbyvrtT8fElCitNcrBbNPPnLiz3BbVqe1wpEw1vLA8VR6ORYvQk81MFvKlUAtr-0ugzNWt1RGSeeVV_fn6UUsc';
+            var convertedVapidPublicKey = urlBase64ToUint8Array(vapidPublicKey);
+            //create new subscrption
+            return reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: convertedVapidPublicKey
+            })
+        }
+        else{
+            //use exsiting one
+        }
+    }).then(function(newSub){
+        return fetch('https://pwaprogram-4dd56-default-rtdb.firebaseio.com/subscriptions.json',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(newSub)
+            }
+        )
+    }).then(function(res){
+        if(res.ok){
+            displayConfirmNotification();
+        }
+    }).catch(function(err){
+        console.log(err);
+    })
+}
+
 function askForNotificationPermission(){
     Notification.requestPermission(function(result){ //open prompt to user to allow notification
         console.log('User result', result);
@@ -137,12 +178,13 @@ function askForNotificationPermission(){
             console.log('No notification permission granted!');
         }
         else{
-            displayConfirmNotification();
+            // displayConfirmNotification();
+            configurePushSub();
         }
     })
 }
 
-if('Notification' in window){
+if('Notification' in window && 'serviceWorker' in navigator){
     for(var i = 0; i < enableNotificationsBtns.length ; i++){
         enableNotificationsBtns[i].style.display = 'inline-block';
         enableNotificationsBtns[i].addEventListener('click', askForNotificationPermission)
