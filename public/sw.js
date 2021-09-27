@@ -223,3 +223,19 @@ self.addEventListener('sync', function(event){
       )
     }
   })
+
+  self.addEventListener('notificationclick', function(event){
+    var notification = event.notification;
+    var action = event.action;
+
+    if(action === 'confirm'){//action Id
+        notification.close();
+    }else{
+        console.log(action)
+    }
+  })
+  
+  //here we can listen to cancel/ swip notification or clear all notifications
+  self.addEventListener('notificationclose', function(event){
+
+  })

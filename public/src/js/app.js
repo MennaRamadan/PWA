@@ -105,7 +105,19 @@ window.addEventListener('beforeinstallprompt', function(event){
 function displayConfirmNotification(){
     if('serviceWorker' in navigator){
         var options = {
-            body: 'You successfully subscribed to our notification service'
+            body: 'You successfully subscribed to our notification service',
+            icon: '/src/images/icons/app-icon-96x96.png',
+            image: '/src/images/sf-boat.jpg',
+            dir: 'ltr',
+            lang: 'en-US', //BCP 47
+            vibrate: [100,50,200],
+            badge: '/src/images/icons/app-icon-96x96.png',
+            tag: 'confirm-notification',
+            renotify: true, //vibrate in each new application
+            actions: [
+                {action: 'confirm', title: 'Okay', icon: '/src/images/icons/app-icon-96x96.png'},
+                {action: 'cancle', title: 'Cancle', icon: '/src/images/icons/app-icon-96x96.png'}
+            ]
         }
         navigator.serviceWorker.ready.then(function(swReg){//show notification using service workers
             swReg.showNotification('Successfully subscribed (From SW)!', options)
