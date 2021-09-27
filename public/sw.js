@@ -231,11 +231,49 @@ self.addEventListener('sync', function(event){
     if(action === 'confirm'){//action Id
         notification.close();
     }else{
-        console.log(action)
+        console.log(action);
+        event.waitUntil(
+            clients.matchAll().then(function(clis){
+                var client = clis.find(function(c){
+                    return c.visibiltyState = 'visible';
+                })
+                if(client !== undefined){
+                    client.navigate(notification.data.openUrl);
+                    client.focus()
+                }
+                else{
+                    client.openWindow(notification.data.openUrl)
+                }
+                notification.close();
+            })
+        )
     }
   })
   
   //here we can listen to cancel/ swip notification or clear all notifications
   self.addEventListener('notificationclose', function(event){
 
+  })
+
+  self.addEventListener('push', function(event){
+      console.log('push notification recieved');
+
+      var data = {Title: 'New', content: 'Something new happened', openUrl: '/'}
+      if(event.data){
+        data = JSON.parse(event.data.text())
+      }
+
+      var options = {
+          body: data.content,
+          icon: '/src/images/icons/app-icon-96x96.png',
+          badge : '/src/images/icons/app-icon-96x96.png',
+          data: {
+              url: data.openUrl,
+
+          }
+      }
+
+      event.waitUntil(
+          self.registration.showNotification(data.title, options)
+          )
   })
