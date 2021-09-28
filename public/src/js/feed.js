@@ -5,11 +5,60 @@ var sharedMomentsArea = document.querySelector('#shared-moments');
 var form = document.querySelector('form');
 var titleForm = document.querySelector('#title');
 var locationForm = document.querySelector('#location');
+var videoPlayer = document.querySelector('#player');
+var canvasElem = document.querySelector('#canvas');
+var captureButton = document.querySelector('#capture-btn');
+var imagePicker = document.querySelector('#image-picker');
+var imagePickerArea = document.querySelector('#pick-image');
+
+
+function intializeMedia(){
+  if(!('mediaDevices' in navigator)){
+    navigator.mediaDevices = {};
+  }
+
+  //browsers don't support it but has its' own implementation 
+  //browser that doesnot support the modern syntex
+  if(!('getUserMedia' in navigator.mediaDevices)){
+    navigator.mediaDevices.getUserMedia = function(constraints){
+      var getUserMedia = navigator.webKitGetUserMedia || navigator.mozGetUserMedia; 
+      if(!getUserMedia){
+        return Promise.reject(new Error('get User media is not implemented'))
+      }
+
+      return new Promise(function(resolve, reject){
+        getUserMedia.call(navigator, constraints, resolve, reject)
+      })
+    }
+  }
+
+  //also may take , audio: true plus video
+  navigator.mediaDevices.getUserMedia({video: true})
+  .then(function(stream){
+    videoPlayer.srcObject = stream;
+    videoPlayer.style.display = 'block';
+  }).catch(function(err){
+    //device which has no access to camera
+    imagePickerArea.style.display = 'block';
+  })
+}
+
+captureButton.addEventListener('click', function(event){
+  canvasElem.style.display = 'block';
+  videoPlayer.style.display = 'none';
+  captureButton.style.display = 'none';
+  var context = canvasElem.getContext('2d');
+  context.drawImage(videoPlayer, 0, 0, canvas.width, videoPlayer.videoHeight/ (videoPlayer.videoWidth/ canvas.width));
+  videoPlayer.srcObject.getVideoTracks().forEach(function(track){
+    track.stop();
+  })
+})
 
 function openCreatePostModal() {
   // createPostArea.style.display = 'block';
   // setTimeout(function(){
     createPostArea.style.transform = 'translateY(0)';
+    intializeMedia();
   // },1)
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -39,6 +88,9 @@ function openCreatePostModal() {
 
 function closeCreatePostModal() {
   createPostArea.style.transform = 'translateY(100vh)';
+  imagePickerArea.style.display = 'none';
+  videoPlayer.style.display = 'none';
+  canvasElem.style.display = 'none';
   // createPostArea.style.display = 'none';
 }
 
