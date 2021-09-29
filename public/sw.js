@@ -195,18 +195,21 @@ self.addEventListener('sync', function(event){
       event.waitUntil(
         readAllData('sync-posts').then(function(data){
             for(var dt of data) {
+                var postData = new FormData();
+                postData.append('id', dt.id);
+                postData.append('Title', dt.Title);
+                postData.append('Location', dt.Location);
+                postData.append('file', dt.picture, dt.id+ '.png');
+
+
                 fetch('https://us-central1-pwaprogram-4dd56.cloudfunctions.net/storePostData', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                    id: dt.id,
-                    Title : dt.Title,
-                    Location: dt.Location,
-                    image: 'https://firebasestorage.googleapis.com/v0/b/pwaprogram-4dd56.appspot.com/o/CITY-SFO-1.jfif?alt=media&token=f0673f33-3ec7-4765-9127-e0e282d42a9c'
-                    })
+                    //We will send form data to accept file (image)
+                    // headers: {
+                    //     'Content-Type': 'application/json',
+                    //     'Accept': 'application/json'
+                    // },
+                    body: postData
                 }).then(function(res){
                     console.log('Sent data', res);
                     if(res.ok){//200

@@ -10,7 +10,7 @@ var canvasElem = document.querySelector('#canvas');
 var captureButton = document.querySelector('#capture-btn');
 var imagePicker = document.querySelector('#image-picker');
 var imagePickerArea = document.querySelector('#pick-image');
-
+var picture;
 
 function intializeMedia(){
   if(!('mediaDevices' in navigator)){
@@ -51,7 +51,8 @@ captureButton.addEventListener('click', function(event){
   context.drawImage(videoPlayer, 0, 0, canvas.width, videoPlayer.videoHeight/ (videoPlayer.videoWidth/ canvas.width));
   videoPlayer.srcObject.getVideoTracks().forEach(function(track){
     track.stop();
-  })
+  });
+  picture = dataURItoBlob(canvasElem.toDataURL());
 })
 
 function openCreatePostModal() {
@@ -177,18 +178,15 @@ if('indexDB' in window){
 }
 
 function sendData(){
+  var postData = new FormData();
+      postData.append('id', new Date().toISOString());
+      postData.append('Title', titleForm.value);
+      postData.append('Location', locationForm.value);
+      postData.append('file', picture, new Date().toISOString()+ '.png');
+
   fetch('https://us-central1-pwaprogram-4dd56.cloudfunctions.net/storePostData', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify({
-      id: new Date().toISOString(),
-      Title : titleForm.value,
-      Location: locationForm.value,
-      image: 'https://firebasestorage.googleapis.com/v0/b/pwaprogram-4dd56.appspot.com/o/CITY-SFO-1.jfif?alt=media&token=f0673f33-3ec7-4765-9127-e0e282d42a9c'
-    })
+    body: postData
   }).then(function(res){
     console.log('Sent data', res);
     updateUI();
@@ -206,7 +204,8 @@ form.addEventListener('submit', function(event){
       var post = {
         'id': new Date().toISOString(),
         'Title': titleForm.value,
-        'Location': locationForm.value
+        'Location': locationForm.value,
+        'picture' : picture
       }
       writeData('sync-posts', post).then(function(){
         return sw.sync.register('sync-new-post');
