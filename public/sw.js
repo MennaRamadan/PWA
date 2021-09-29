@@ -3,16 +3,17 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
 
-var CACHE_STATIC_NAME = 'static-v33'; 
-var CACHE_DYNAMIC_NAME = 'dynamic-v2';
+var CACHE_STATIC_NAME = 'static-v35'; 
+var CACHE_DYNAMIC_NAME = 'dynamic-v3';
 var STATIC_FILES = [
     '/',
     '/index.html',
     '/offline.html',
     '/src/js/app.js',
+    '/src/js/utility.js',
     '/src/js/feed.js',
-    '/src/js/promise.js',
     '/src/js/idb.js',
+    '/src/js/promise.js',
     '/src/js/fetch.js',
     '/src/js/material.min.js',
     '/src/css/app.css',
@@ -199,7 +200,7 @@ self.addEventListener('sync', function(event){
                 postData.append('id', dt.id);
                 postData.append('Title', dt.Title);
                 postData.append('Location', dt.Location);
-                postData.append('file', dt.picture, dt.id+ '.png');
+                postData.append('file', dt.picture, dt.id + '.png');
 
 
                 fetch('https://us-central1-pwaprogram-4dd56.cloudfunctions.net/storePostData', {
@@ -238,14 +239,14 @@ self.addEventListener('sync', function(event){
         event.waitUntil(
             clients.matchAll().then(function(clis){
                 var client = clis.find(function(c){
-                    return c.visibiltyState = 'visible';
+                    return c.visibiltyState == 'visible';
                 })
                 if(client !== undefined){
-                    client.navigate(notification.data.openUrl);
+                    client.navigate(notification.data.url);
                     client.focus()
                 }
                 else{
-                    client.openWindow(notification.data.openUrl)
+                    client.openWindow(notification.data.url)
                 }
                 notification.close();
             })
