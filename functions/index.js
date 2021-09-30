@@ -106,7 +106,7 @@ exports.storePostData = functions.https.onRequest(function(request, response) {
                     .sendNotification(
                       pushConfig,
                       JSON.stringify({
-                        title: "New Post",
+                        Title: "New Post",
                         content: "New Post added!",
                         openUrl: "/help"
                       })

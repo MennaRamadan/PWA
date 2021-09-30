@@ -11,6 +11,12 @@ var captureButton = document.querySelector('#capture-btn');
 var imagePicker = document.querySelector('#image-picker');
 var imagePickerArea = document.querySelector('#pick-image');
 var picture;
+var locationBtn = document.querySelector('#location-btn');
+var loader = document.querySelector('location-loader')
+
+locationBtn.addEventListener('click', function(event){
+
+})
 
 function intializeMedia(){
   if(!('mediaDevices' in navigator)){
@@ -55,11 +61,16 @@ captureButton.addEventListener('click', function(event){
   picture = dataURItoBlob(canvasElem.toDataURL());
 })
 
+imagePicker.addEventListener('change', function(event){
+  picture = event.target.files[0];
+})
+ 
 function openCreatePostModal() {
   // createPostArea.style.display = 'block';
   // setTimeout(function(){
     createPostArea.style.transform = 'translateY(0)';
     intializeMedia();
+    intializeLocation()
   // },1)
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -92,6 +103,8 @@ function closeCreatePostModal() {
   imagePickerArea.style.display = 'none';
   videoPlayer.style.display = 'none';
   canvasElem.style.display = 'none';
+  locationBtn.style.display = 'inline';
+  loader.style.display = 'none';
   // createPostArea.style.display = 'none';
 }
 
