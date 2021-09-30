@@ -52,7 +52,7 @@ exports.storePostData = functions.https.onRequest(function(request, response) {
 
     // This callback will be invoked after all uploaded files are saved.
     busboy.on("finish", () => {
-      var bucket = gcs.bucket("YOUR_PROJECT_ID.appspot.com");
+      var bucket = gcs.bucket("pwaprogram-4dd56.appspot.com");
       bucket.upload(
         upload.file,
         {
@@ -71,8 +71,8 @@ exports.storePostData = functions.https.onRequest(function(request, response) {
               .ref("posts")
               .push({
                 id: fields.id,
-                title: fields.title,
-                location: fields.location,
+                Title: fields.Title,
+                Location: fields.Location,
                 image:
                   "https://firebasestorage.googleapis.com/v0/b/" +
                   bucket.name +

@@ -23,7 +23,7 @@ function intializeMedia(){
     navigator.mediaDevices.getUserMedia = function(constraints){
       var getUserMedia = navigator.webKitGetUserMedia || navigator.mozGetUserMedia; 
       if(!getUserMedia){
-        return Promise.reject(new Error('get User media is not implemented'))
+        return Promise.reject(new Error('getUserMedia is not implemented'))
       }
 
       return new Promise(function(resolve, reject){
@@ -144,33 +144,35 @@ function createCard(data) {
 }
 
 function updateUI(data){
+  clearCards();
   for (var i = 0; i < data.length ; i++){
     createCard(data[i]);
   }
 }
 
 var url = 'https://pwaprogram-4dd56-default-rtdb.firebaseio.com/posts.json';
-var networkDataRecived = false;
+var networkDataReceived = false;
 
 fetch(url)
   .then(function(res) {
     return res.json();
   })
   .then(function(data) {
-    networkDataRecived = true;
+    networkDataReceived = true;
+    console.log('From web', data);
+
     //to convert from object to array
     var dataArray = [];
     for(var key in data){
       dataArray.push(data[key]);
     }
-    console.log('From Web', data)
     updateUI(dataArray);
 });
 
 
-if('indexDB' in window){
+if('indexedDB' in window){
   readAllData('posts').then(function(data){
-    if(!networkDataRecived){
+    if(!networkDataReceived){
       console.log('From Cache', data)
       updateUI(data);
     }
@@ -196,6 +198,7 @@ function sendData(){
 form.addEventListener('submit', function(event){
   event.preventDefault();
   if(titleForm.value.trim() === '' || locationForm.value.trim() === ''){
+    alert('Please enter valid data!');
     return;
   }
   closeCreatePostModal();

@@ -3,7 +3,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
 
-var CACHE_STATIC_NAME = 'static-v35'; 
+var CACHE_STATIC_NAME = 'static-v36'; 
 var CACHE_DYNAMIC_NAME = 'dynamic-v3';
 var STATIC_FILES = [
     '/',
@@ -49,6 +49,8 @@ self.addEventListener('install', function (event) {
 
 //clear old caches
 self.addEventListener('activate', function(event){
+  console.log('[Service Worker] Activating Service Worker ....', event);
+
     event.waitUntil(
         caches.keys().then(function(keyList){
             //return this function when all return
@@ -192,7 +194,7 @@ self.addEventListener('fetch', function(event){
 self.addEventListener('sync', function(event){
     console.log('[Service worker] Background syncing!', event);
     if(event.tag === 'sync-new-post'){
-      console.log('Syncing new post');
+      console.log('[Service Worker] Syncing new post');
       event.waitUntil(
         readAllData('sync-posts').then(function(data){
             for(var dt of data) {
@@ -231,8 +233,11 @@ self.addEventListener('sync', function(event){
   self.addEventListener('notificationclick', function(event){
     var notification = event.notification;
     var action = event.action;
+    console.log(notification);
 
     if(action === 'confirm'){//action Id
+    console.log('Confirm was chosen');
+
         notification.close();
     }else{
         console.log(action);
@@ -256,6 +261,8 @@ self.addEventListener('sync', function(event){
   
   //here we can listen to cancel/ swip notification or clear all notifications
   self.addEventListener('notificationclose', function(event){
+  console.log('Notification was closed', event);
+
 
   })
 
