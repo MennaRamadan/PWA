@@ -7,3 +7,6 @@ You need [Node.js](https://nodejs.org) installed on your machine. Simply downloa
 Once Node.js is installed, open your command prompt or terminal and **navigate into this project folder**. There, run `npm install` to install all required dependencies.
 
 Finally, run `npm start` to start the development server and visit [localhost:8080](http://localhost:8080) to see the running application.
+
+# Workbox
+To build workbox use the following command ` workbox generateSW workbox-config.js`

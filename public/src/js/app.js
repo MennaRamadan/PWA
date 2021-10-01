@@ -7,7 +7,7 @@ if(!window.Promise){
 
 //This mean that browser will excute the code if it support serviceworker
 if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js').then(function(){
+    navigator.serviceWorker.register('/service-workers.js').then(function(){
         console.log('Serviceworker registered');
     }).catch(function(err){
         console.log(err)
